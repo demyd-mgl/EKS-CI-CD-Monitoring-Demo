@@ -1,0 +1,20 @@
+# Requires the Prometheus Operator CRDs, which come from the kube-prometheus-stack
+# Helm release provisioned in terraform/monitoring.tf.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: sample-app
+  namespace: sample-app
+  labels:
+    release: kube-prometheus-stack # matches the Helm release so it gets picked up
+spec:
+  selector:
+    matchLabels:
+      app: sample-app
+  namespaceSelector:
+    matchNames:
+      - sample-app
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s

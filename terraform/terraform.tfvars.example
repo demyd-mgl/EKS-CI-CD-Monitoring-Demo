@@ -1,0 +1,14 @@
+# Copy to terraform.tfvars and fill in, or pass equivalent -var flags / TF_VAR_* env vars in CI.
+# terraform.tfvars is gitignored on purpose -- never commit real secrets.
+
+aws_region   = "eu-central-1"
+project_name = "eks-demo"
+environment  = "dev"
+
+# Required once you know it, so GitHub Actions gets a scoped IAM role instead of static keys:
+github_repo = "your-github-username/devops-eks-demo"
+
+# Required once the role above exists, so it gets kubectl access to the cluster (two-step apply):
+# ci_deploy_role_arn = "arn:aws:iam::123456789012:role/eks-demo-dev-github-actions"
+
+# grafana_admin_password = "set-a-real-value-or-use-TF_VAR_grafana_admin_password"
