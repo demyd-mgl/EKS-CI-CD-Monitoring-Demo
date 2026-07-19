@@ -15,11 +15,17 @@ variable "create_github_oidc_provider" {
   default = true
 }
 
-# GitHub's OIDC thumbprint. GitHub rotates the underlying cert but keeps
-# this thumbprint value stable; AWS also validates the token itself, so this
-# is not a meaningful security control -- it's just a required field.
+# GitHub's OIDC intermediate CA thumbprints. AWS actually validates the token
+# itself (audience + issuer + signature), so this thumbprint is a required
+# field rather than a meaningful security control -- but it still has to be
+# a syntactically valid 40-char SHA-1 hex digest, and GitHub's cert is
+# cross-signed by two possible intermediate CAs, so both are listed here per
+# GitHub's own guidance (see https://github.blog/changelog/2023-06-27-github-actions-update-on-oidc-integration-with-aws/).
 locals {
-  github_oidc_thumbprint = "6938fd4d98bab03faadb97b34396831e3780aea"
+  github_oidc_thumbprints = [
+    "6938fd4d98bab03faadb97b34396831e3780aea1",
+    "1c58a3a8518e8759bf075b76b750d4f2df264fcd",
+  ]
 }
 
 resource "aws_iam_openid_connect_provider" "github" {
@@ -27,7 +33,7 @@ resource "aws_iam_openid_connect_provider" "github" {
 
   url             = "https://token.actions.githubusercontent.com"
   client_id_list  = ["sts.amazonaws.com"]
-  thumbprint_list = [local.github_oidc_thumbprint]
+  thumbprint_list = local.github_oidc_thumbprints
 
   tags = local.common_tags
 }

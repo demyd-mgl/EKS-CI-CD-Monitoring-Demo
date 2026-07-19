@@ -17,7 +17,7 @@ permissions:
   contents: read
 
 env:
-  AWS_REGION: eu-central-1
+  AWS_REGION: eu-north-1
   CLUSTER_NAME: eks-demo-dev-cluster
   ECR_REPOSITORY: eks-demo-dev-app
 

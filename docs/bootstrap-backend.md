@@ -7,8 +7,8 @@ reach. Create it once, by hand, **before** the S3 backend block in
 ```bash
 aws s3api create-bucket \
   --bucket YOUR_UNIQUE_BUCKET_NAME \
-  --region eu-central-1 \
-  --create-bucket-configuration LocationConstraint=eu-central-1
+  --region eu-north-1 \
+  --create-bucket-configuration LocationConstraint=eu-north-1
 
 aws s3api put-bucket-versioning \
   --bucket YOUR_UNIQUE_BUCKET_NAME \

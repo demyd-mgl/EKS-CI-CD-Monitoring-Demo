@@ -1,7 +1,7 @@
 # Copy to terraform.tfvars and fill in, or pass equivalent -var flags / TF_VAR_* env vars in CI.
 # terraform.tfvars is gitignored on purpose -- never commit real secrets.
 
-aws_region   = "eu-central-1"
+aws_region   = "eu-north-1"
 project_name = "eks-demo"
 environment  = "dev"
 

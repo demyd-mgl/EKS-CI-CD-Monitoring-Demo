@@ -23,7 +23,7 @@ terraform {
   # backend "s3" {
   #   bucket         = "REPLACE_ME-tfstate-bucket"
   #   key            = "eks-demo/terraform.tfstate"
-  #   region         = "eu-central-1"
+  #   region         = "eu-north-1"
   #   dynamodb_table = "REPLACE_ME-tf-locks"
   #   encrypt        = true
   # }
