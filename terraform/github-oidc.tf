@@ -125,6 +125,16 @@ resource "aws_iam_role_policy" "github_actions_ecr_eks" {
         Effect   = "Allow"
         Action   = ["eks:DescribeCluster"]
         Resource = module.eks.cluster_arn
+      },
+      {
+        # The terraform-aws-modules/eks module resolves the calling
+        # identity's underlying role (via data.aws_iam_session_context)
+        # whenever enable_cluster_creator_admin_permissions = true, which
+        # requires this role to be able to read its own IAM role.
+        Sid      = "IamGetOwnRole"
+        Effect   = "Allow"
+        Action   = ["iam:GetRole"]
+        Resource = aws_iam_role.github_actions[0].arn
       }
     ]
   })
