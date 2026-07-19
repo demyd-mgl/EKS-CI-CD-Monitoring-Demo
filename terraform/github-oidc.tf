@@ -53,6 +53,11 @@ locals {
   )
 }
 
+locals {
+  github_owner = element(split("/", var.github_repo), 0)
+  github_repo_name = element(split("/", var.github_repo), 1)
+}
+
 resource "aws_iam_role" "github_actions" {
   count = var.github_repo == "" ? 0 : 1
   name  = "${local.name}-github-actions"
@@ -70,7 +75,15 @@ resource "aws_iam_role" "github_actions" {
           "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
         }
         StringLike = {
-          "token.actions.githubusercontent.com:sub" = "repo:${var.github_repo}:*"
+          # Matches both subject claim formats GitHub issues:
+          #  - legacy:   repo:OWNER/REPO:*
+          #  - immutable (default for repos created after 2026-07-15, or
+          #    opted into on older repos): repo:OWNER@ownerId/REPO@repoId:*
+          # See https://github.blog/changelog/2026-04-23-immutable-subject-claims-for-github-actions-oidc-tokens/
+          "token.actions.githubusercontent.com:sub" = [
+            "repo:${var.github_repo}:*",
+            "repo:${local.github_owner}@*/${local.github_repo_name}@*:*",
+          ]
         }
       }
     }]
