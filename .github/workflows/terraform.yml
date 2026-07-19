@@ -1,5 +1,13 @@
 name: Terraform (infra)
 
+# Cost-safety default: `plan` runs automatically (read-only, free) on PRs and
+# pushes to main so you always see what would change. `apply` NEVER runs
+# automatically -- it only runs when someone manually triggers this workflow
+# from the Actions tab ("Run workflow") and types the exact confirmation
+# phrase below. That's deliberate: this repo provisions real, billed AWS
+# resources (EKS, NAT gateway, etc.), and a stray commit should never be able
+# to trigger a bill.
+
 on:
   pull_request:
     paths:
@@ -8,7 +16,12 @@ on:
     branches: [main]
     paths:
       - "terraform/**"
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      confirm_apply:
+        description: 'Type exactly "apply" to actually create/modify real AWS resources. Anything else runs a plan only.'
+        required: true
+        default: ""
 
 permissions:
   id-token: write   # needed to mint the OIDC token for AWS
@@ -21,7 +34,9 @@ env:
 
 jobs:
   plan:
-    if: github.event_name == 'pull_request'
+    # Runs on every PR and every push to main -- read-only, costs nothing,
+    # gives you visibility into drift/changes without ever touching real infra.
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -45,6 +60,7 @@ jobs:
         id: plan
 
       - name: Post plan to PR
+        if: github.event_name == 'pull_request'
         uses: actions/github-script@v7
         with:
           script: |
@@ -60,9 +76,11 @@ jobs:
             });
 
   apply:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # Manual-only, and only if the confirmation phrase matches exactly.
+    # Trigger from: repo -> Actions -> "Terraform (infra)" -> Run workflow.
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.confirm_apply == 'apply'
     runs-on: ubuntu-latest
-    environment: production # add required reviewers on this environment in repo settings for a manual gate
+    environment: production # add required reviewers on this environment in repo settings for an extra manual gate
     defaults:
       run:
         working-directory: terraform

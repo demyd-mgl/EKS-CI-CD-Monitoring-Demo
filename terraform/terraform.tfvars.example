@@ -8,6 +8,11 @@ environment  = "dev"
 # Required once you know it, so GitHub Actions gets a scoped IAM role instead of static keys:
 github_repo = "your-github-username/devops-eks-demo"
 
+# Set to false only if your AWS account already has a GitHub OIDC provider
+# (IAM -> Identity providers -> token.actions.githubusercontent.com). Leave
+# true on a fresh account -- a duplicate-create fails the apply.
+# create_github_oidc_provider = true
+
 # Required once the role above exists, so it gets kubectl access to the cluster (two-step apply):
 # ci_deploy_role_arn = "arn:aws:iam::123456789012:role/eks-demo-dev-github-actions"
 
