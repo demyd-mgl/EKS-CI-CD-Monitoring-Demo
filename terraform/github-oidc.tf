@@ -11,8 +11,8 @@ variable "create_github_oidc_provider" {
     already exists (AWS allows just one per URL per account -- check
     IAM -> Identity providers first; a duplicate-create fails the apply).
   EOT
-  type    = bool
-  default = true
+  type        = bool
+  default     = true
 }
 
 # GitHub's OIDC intermediate CA thumbprints. AWS actually validates the token
@@ -54,7 +54,7 @@ locals {
 }
 
 locals {
-  github_owner = element(split("/", var.github_repo), 0)
+  github_owner     = element(split("/", var.github_repo), 0)
   github_repo_name = element(split("/", var.github_repo), 1)
 }
 
@@ -101,9 +101,9 @@ resource "aws_iam_role_policy" "github_actions_ecr_eks" {
     Version = "2012-10-17"
     Statement = [
       {
-        Sid    = "EcrAuth"
-        Effect = "Allow"
-        Action = ["ecr:GetAuthorizationToken"]
+        Sid      = "EcrAuth"
+        Effect   = "Allow"
+        Action   = ["ecr:GetAuthorizationToken"]
         Resource = "*"
       },
       {
