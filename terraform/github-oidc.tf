@@ -144,3 +144,20 @@ output "github_actions_role_arn" {
   value       = var.github_repo == "" ? "Set var.github_repo (or -var github_repo=org/repo) to create this role" : aws_iam_role.github_actions[0].arn
   description = "Put this in the AWS_ROLE_TO_ASSUME repo variable/secret for GitHub Actions"
 }
+
+# The narrower policy above is enough for the app-deploy workflow (push to
+# ECR, describe the cluster). But terraform.yml's apply job runs a full
+# `terraform apply` against this whole stack -- VPC, security groups, IAM
+# roles, EKS, ELB, KMS, autoscaling, etc. -- via the eks/vpc modules'
+# transitive resources. Hand-crafting least-privilege IAM for that entire
+# graph isn't practical for a personal/demo account, so this role gets broad
+# admin permissions instead, and the real security boundary is:
+#   1. the trust policy above (only this exact repo can assume the role)
+#   2. the manual, typed-confirmation apply gate in .github/workflows/terraform.yml
+# For a real production setup, replace this with a scoped policy covering
+# only the specific ec2/iam/eks/elb/kms actions Terraform actually needs.
+resource "aws_iam_role_policy_attachment" "github_actions_admin" {
+  count      = var.github_repo == "" ? 0 : 1
+  role       = aws_iam_role.github_actions[0].name
+  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
+}
